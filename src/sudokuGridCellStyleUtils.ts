@@ -5,7 +5,7 @@ export type SudokuGridBorderStyles = {
   borderBottom: string;
 };
 
-export const computeBorder = (
+export const computeGridCellBorder = (
   rowIndex: number,
   colIndex: number,
 ): SudokuGridBorderStyles => {
@@ -29,4 +29,17 @@ export const computeBorder = (
     borderRight: colIndex === 8 ? "3px solid white" : "",
     borderBottom: `${bottomBorderWidth} solid white`,
   };
+};
+
+export const computeGridCellBackground = (
+  cellHasError: boolean,
+  blockHasError: boolean,
+) => {
+  if (cellHasError) {
+    return "pink.7";
+  } else if (blockHasError) {
+    return "orange.5";
+  } else {
+    return "dark.6";
+  }
 };
