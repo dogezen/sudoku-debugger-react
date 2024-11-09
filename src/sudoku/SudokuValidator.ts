@@ -1,20 +1,20 @@
 export type SudokuGrid = Array<Array<number>>;
 export type GridInfo = Array<Array<CellInfo>>;
 
+// represents a cell in the sudoku grid
 type Cell = {
   rowId: number;
   colId: number;
   value: number;
 };
 
+// stores additional info about the cell in terms of detected errors
 export type CellInfo = Cell & {
   // whether the cell is a duplicate number
   isDuplicate: boolean;
-
-  // whether this cell is in an invalid row, col or block
-  // isInInvalidRowColOrBlock: boolean;
 };
 
+// stores information about which values are duplicate, and which cells are the ones that correspond to the duplication
 export type DuplicateValues = {
   // the value that is duplicate
   value: number;
@@ -22,28 +22,33 @@ export type DuplicateValues = {
   cells: [Cell];
 };
 
+// represents the errors for a row, column or 3x3 block
 type SudokuError = {
   // the rowId in case errorType is row or blockb
   rowId: number | undefined;
   // the colId in case errorType is col or block
   colId: number | undefined;
+  // whether the error is for a row, column or 3x3 block
   errorType: "row" | "col" | "block";
 
-  // duplicate numbers
+  // duplicate numbers in that row, col or block
   duplicates: DuplicateValues[];
-  // missing numbers
+  // missing numbers in that row, col or block
   missing: number[];
 };
 
 export class SudokuValidator {
-  private grid: SudokuGrid;
+  private inputGrid: SudokuGrid;
 
   gridInfo: GridInfo;
   errors: SudokuError[] = [];
 
   constructor(grid: SudokuGrid) {
-    this.grid = grid;
+    this.inputGrid = grid;
+    // converts input grid into CellInfo grid for ease of solving the error detection
     this.gridInfo = this._composeGridInfo();
+    // validates the sudoku and identifies errors
+    this.validate();
   }
 
   validate(): void {
@@ -68,7 +73,7 @@ export class SudokuValidator {
         const cell = {
           rowId,
           colId,
-          value: this.grid[rowId][colId],
+          value: this.inputGrid[rowId][colId],
           isDuplicate: false,
           isInInvalidRowColOrBlock: false,
         };
@@ -81,6 +86,7 @@ export class SudokuValidator {
 
   private _validateRows(): void {
     for (let rowId = 0; rowId < 9; rowId++) {
+      // get the values in the row, and check for duplicates and missing numbers
       const row = this.gridInfo[rowId];
       const rowError = this._validateBlock(rowId, undefined, "row", row);
       if (rowError) {
@@ -92,10 +98,12 @@ export class SudokuValidator {
   private _validateCols(): void {
     for (let colId = 0; colId < 9; colId++) {
       const colCells = [];
+      // get all column values first
       for (let rowId = 0; rowId < 9; rowId++) {
         const cell = this.gridInfo[rowId][colId];
         colCells.push(cell);
       }
+      // validate for duplicates or missing cells in the column
       const colError = this._validateBlock(undefined, colId, "col", colCells);
       if (colError) {
         this.errors.push(colError);
@@ -107,6 +115,7 @@ export class SudokuValidator {
   private _validateBlocks(): void {
     for (let rowId = 0; rowId < 9; rowId += 3) {
       for (let colId = 0; colId < 9; colId += 3) {
+        // obtain the 9 numbers in the 3x3 block
         const blockCells = [];
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 3; j++) {
@@ -114,6 +123,7 @@ export class SudokuValidator {
             blockCells.push(cell);
           }
         }
+        // determine if there are duplicates or missing numbers
         const blockError = this._validateBlock(
           rowId,
           colId,
@@ -145,8 +155,6 @@ export class SudokuValidator {
       const cell = cells[i];
       const value = cell.value;
 
-      // console.log("computing for", value);
-
       if (value === 0) {
         continue;
       }
@@ -154,16 +162,17 @@ export class SudokuValidator {
       // remove the value from the missing numbers
       const index = error.missing.indexOf(value);
       if (index !== -1) {
+        // remove numbers that are not missing
         error.missing.splice(index, 1);
       }
 
       // check for duplicates
-
       const duplicates = cells.filter((cell) => cell.value === value);
       if (duplicates.length > 1) {
+        // mark all cells that have duplicates as having duplicates
         duplicates.forEach((cell) => (cell.isDuplicate = true));
 
-        // find if error.duplicates contains value
+        // create duplicate data object
         const duplicateValue = error.duplicates.find((d) => d.value === value);
         if (duplicateValue) {
           duplicateValue.cells.push(cell);
