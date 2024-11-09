@@ -1,50 +1,23 @@
-# React + TypeScript + Vite
+# React Sudoku Debugger
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Run
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```bash
+npm install
+npm run dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+To change the display to a working grid, edit `App.tsx` and change the input grid at the start of the App component.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+The debugger shows rows and columns that have errors and indicates which cells have duplicate values.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+The debugger then displays a summary of all detected errors.
+
+If more time available:
+- add live edititng of numbers in the grid
+- with live editing of numbers in the grid, then extract out as a separate hook (or just as useEffect + state in App.tsx) the logic to send the updated grid and re-validate it with new results; custom hook component preferable, to abstract out the business logic; `const {validator, originalGrid, updateGrid} = useSudokuValidator(initialGrid);`
+- add buttons to switch between preset grids
+- add full logic to colour in all the cells in incorrect blocks - currently not implemented
+- in the error summary: correctly display the row or column numbers alongside the duplicate values
+- add hover detection to interactively highlight the row and column of the cell being hovered over and emphasize the error description
+- responsiveness
